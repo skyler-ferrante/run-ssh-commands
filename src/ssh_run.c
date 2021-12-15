@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Header comments are in .h file
+// Function comments are in .h file
 // (Sorry!)
 
 void session_init(ssh_session session, char* host, int port, int verbosity){
