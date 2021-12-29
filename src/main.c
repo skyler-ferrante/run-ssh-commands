@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include "ssh_run.h"
 
-#define ARG_SIZE 20
+#define ARG_SIZE 1024
 #define DEBUG
 
 /**
@@ -44,9 +44,9 @@ int main(int argc, char** argv){
 	FILE *fptr = fopen(argv[1], "r");
 	fscanf(fptr, "%s\n", host);
 	fscanf(fptr, "%d\n", &port);
-	get_string_with_whitespace(fptr, username, 20);
-	get_string_with_whitespace(fptr, password, 20);
-	get_string_with_whitespace(fptr, command, 20);
+	get_string_with_whitespace(fptr, username, ARG_SIZE);
+	get_string_with_whitespace(fptr, password, ARG_SIZE);
+	get_string_with_whitespace(fptr, command, ARG_SIZE);
 
 	fclose(fptr);
 
@@ -57,10 +57,15 @@ int main(int argc, char** argv){
 	printf("Password: %s\n", password);
 	printf("Command: %s\n",  command);
 	#endif
-	
+
 	// Create session
 	ssh_session my_ssh_session = ssh_new();
+	
+	#ifdef DEBUG
 	session_init(my_ssh_session, host, port, SSH_LOG_PROTOCOL);
+	#else
+	session_init(my_ssh_session, host, port, SSH_LOG_NOLOG);
+	#endif
 
 	// Connect
 	connect_session(my_ssh_session, host);
@@ -74,25 +79,36 @@ int main(int argc, char** argv){
 	size_t hlen;
 	get_key_hash(&key, &hash, &hlen);
 	
+	#ifdef DEBUG	
 	// Print hash
 	ssh_print_hash( HASH_TYPE, hash, hlen);	
-
+	#endif
+		
 	// Authenticate
 	authenticate_username_password(my_ssh_session, username, password);
+	#ifdef DEBUG
 	printf("Authentication: SUCCESS\n");
+	#endif
 
 	// Create channel
 	ssh_channel my_channel;
 	create_channel(my_ssh_session, &my_channel);
+	#ifdef DEBUG
 	printf("Channel: SUCCESS\n");
-
+	#endif
+		
 	// Run command
 	char buffer[BUFFER_SIZE];
 	int nbytes = execute_ssh(my_ssh_session, my_channel, command, buffer);
+	#ifdef DEBUG
+	printf("NumBytes: %d\n", nbytes);	
+	if( nbytes >= 0 ) {
+		printf("Execute SUCCESS\n");
+	}
+	#endif
 	printf("%s", buffer);
-	
+
 	// Disconnect and free
 	ssh_key_free(key);
 	cleanup(my_ssh_session);
-	printf("Done!\n");
 }

@@ -74,8 +74,6 @@ int execute_ssh(ssh_session session, ssh_channel channel, const char* command, c
 	}
 	int nbytes = ssh_channel_read(channel, buffer, BUFFER_SIZE, 0);
 
-	printf("NumBytes: %d\n", nbytes);
-	
 	// Put sentinel at the end of result
 	if(nbytes >= 0){
 		buffer[nbytes] = '\0';
@@ -86,7 +84,6 @@ int execute_ssh(ssh_session session, ssh_channel channel, const char* command, c
 		buffer[0] = '\0';
 	}
 
-	printf("Execute SUCCESS\n");
 	return nbytes;
 }
 
